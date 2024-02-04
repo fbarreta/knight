@@ -3,7 +3,7 @@ version 41
 __lua__
 levels = {
 	{
-		moves=75,
+		moves=20,
 		grid = {r=5,c=5},
 		holes = {
 			{x = 0,y = 0},
@@ -15,14 +15,14 @@ levels = {
 		}
 	},
 	{
-		moves=40,
+		moves=30,
 		grid = {r=5,c=3},
 		holes = {},
 		ini = {x = 1,y = 2
 		}
 	},
 	{
-		moves=75,
+		moves=50,
 		grid = {r = 5,c = 5},
 		holes = {
 			{x = 0,y = 0},
@@ -40,7 +40,7 @@ levels = {
 		}
 	},
 	{
-		moves=65,
+		moves=50,
 		grid = {r = 4,c = 6},
 		holes = {
 			{x = 0,y = 0},
@@ -56,14 +56,14 @@ levels = {
 		}
 	},
 	{
-		moves=40,
+		moves=25,
 		grid = {r = 3,c = 4},
 		holes = {},
 		ini = {x = 1,y = 2
 		}
 	},
 	{
-		moves=130,
+		moves=100,
 		grid = {r = 5,c = 10},
 		holes = {
 			{x = 0,y = 0},
@@ -128,7 +128,7 @@ levels = {
 		}
 	},
 	{
-		moves=250,
+		moves=200,
 		grid = {r = 10,c = 10},
 		holes = {
 			{x = 0,y = 0},
@@ -176,7 +176,7 @@ levels = {
 		}
 	},
 	{
-		moves=250,
+		moves=220,
 		grid = {r = 9,c = 12},
 		holes = {
 			{x = 0,y = 0},
@@ -282,7 +282,7 @@ function _draw()
  checklevel()
  splashscreen()
  drawlevel()
- //debug(2, 120)
+ debug(2, 120)
 end
 
 function levelupdate()
@@ -306,11 +306,13 @@ function splashscreen()
 	if (loading == false) then return end
 	if (level == 0) then
 		draw_splash()
+	elseif (level == #levels) then
+		draw_winlevel(true)
 	else
 		if lost then
 			draw_looselevel()
 		else
-			draw_winlevel()
+			draw_winlevel(false)
 		end
 	end
 end
@@ -358,10 +360,17 @@ function draw_splash()
 	spr(79,20,90)	
 end
 
-function draw_winlevel()
+function draw_winlevel(endgame)
 	color(0)
 	palt(0,false)
-	print("stage clear",43,14)	
+	local msg = "stage clear"
+	local y = 14
+	local x = 42
+	if endgame then
+		x = 22
+		msg = "you beat the game !!!"
+	end
+	print(msg,x,14)	
 	local y = 72
 	local x = 22
 	spr(176,x,y,3,1)
@@ -405,8 +414,12 @@ function draw_winlevel()
 		spr(71,x,y,6,2)
 	end
 	palt(0,true)
-	spr(96,x+4,y+4,2,1)
-	spr(98,x+24,y+4,3,1)
+	if endgame then
+		spr(115,x+10,y+4,4,1)
+	else
+		spr(96,x+4,y+4,2,1)
+		spr(98,x+24,y+4,3,1)
+	end
 	local y = 104
 	local x = 41
 	palt(0,false)
@@ -473,18 +486,18 @@ function drawui()
 	end
 	line(42,119,86,119,8)
 	//progress bar 44px
-	local range = stars.s0 - stars.s2
-	local rangestep = 100 / range
-	local len = 44
-	local step = len * 0.01
-	local m = (levels[level].moves - moves) - stars.s3
-	local p = step * (m * rangestep)
-	if stars.score < 3 then
-			if p > len then
-				p = len
-			end
-		line(86-p,119,86,119,6)
-	end
+	//local range = 5
+	//local rangestep = 100 / range
+	//local len = 44
+	//local step = len * 0.01
+	//local m = (levels[level].moves - moves) - stars.s2 - stars.s1
+	//local p = flr(step * (m * rangestep))
+	//if stars.score < 3 and p > 0 then
+	//		if p > len then
+	//			p = len
+	//		end
+	//	line(86-p,119,86,119,6)
+	//end
 	line(55,119,55,119,7)
 	line(75,119,75,119,7)
 	local s3 = 8;
@@ -506,6 +519,11 @@ function drawui()
 	color(0)
 	drawbackground()
 	rect(0,0,127,127,0)
+	message = "p:"..tostr(p)
+	      .. " s3:"..tostr(stars.s3)
+							.. " s2:"..tostr(stars.s2)
+							.. " s1:"..tostr(stars.s1)
+							.. " s0:"..tostr(stars.s0)
 end
 
 function drawbackground()
@@ -543,7 +561,9 @@ function checkscreen()
 	if (loading) then
 		if (btnp(5) or btnp(4)) then
 			if nextlevelbtn == false then
-				level -= 1
+				if level > 1 then
+					level -= 1
+				end
 			end
 			if lost then
 				level = 0
@@ -602,16 +622,20 @@ function moveto(x,y)
 		togo -= 1
 	end
 	moves -= 1
-	local p = levels[level].moves - moves
-	if p <= stars.s3 then
-		stars.score = 3
-	elseif p <= stars.s2 then 
+	if moves <= stars.s3 then
 		stars.score = 2
-	elseif p <= stars.s1 then
+	end
+	if moves <= stars.s2 then
 		stars.score = 1
-	else
+	end
+	if moves <= stars.s1 then
 		stars.score = 0
 	end
+	//message = "m:"..tostr(moves)
+	//      .. " s3:"..tostr(stars.s3)
+	//						.. " s2:"..tostr(stars.s2)
+	//						.. " s1:"..tostr(stars.s1)
+	//						.. " s0:"..tostr(stars.s0)
 end
 
 function setmove()
@@ -730,6 +754,10 @@ function startlevel()
 end
 
 function checklevel()
+	if (togo == 0) then
+		loading = true
+		//music(-1)
+	end
 	if level > 0 then
 		if (moves == 0) then
 			lost = true
@@ -737,19 +765,16 @@ function checklevel()
 			//music(-1)
 		end
 	end
-	if (togo == 0) then
-		loading = true
-		//music(-1)
-	end
 end
 
 function calcstars()
 	local m = moves
-	local i = m/4
-	stars.s3 = i;
-	stars.s2 = i * 2;
-	stars.s1 = i * 3;
-	stars.s0 = i * 4;
+	local h = flr(m/2) + 5
+	local i = flr((m-h)/3)
+	stars.s3 = h;
+	stars.s2 = i * 3;
+	stars.s1 = i * 2;
+	stars.s0 = i;
 	stars.score = 3
 end
 
@@ -783,12 +808,12 @@ function debug(x,y)
 end
 __gfx__
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000007770067777777777777777060677777777700000
-06777770000aa000000550000ffffff001111110002002000050050000999900000a000000060000000000007770067777777067777777006777777777700000
-0688777000a00a00005005000ffffff0011111100222222005555550091aaa9000aaa00000666000000000000060067777770067777777006777706777700000
+06fffff0000aa000000550000ffffff001111110002002000050050000999900000a000000060000000000007770067777777067777777006777777777700000
+0688fff000a00a00005005000ffffff0011111100222222005555550091aaa9000aaa00000666000000000000060067777770067777777006777706777700000
 06882880000aa000000550000ffffff001111110020220200505505009aa99007aaaaa7076666670000000000060060670677067700006006067006777700000
 06882880000aa000000550000ffffff001111110022222200555555009a9000004aaa40005666500000000000060670000060677060067000006000677700000
-0677288000aaaa00005555000ffffff001111110002002000050050009aa900000a4a00000656000000000000000060060060060060067006006006777700000
-067777700aaaaaa0055555500ffffff0011111100022220000555500009999900040400000505000000000000060060060670060060067006067006777700000
+06ff288000aaaa00005555000ffffff001111110002002000050050009aa900000a4a00000656000000000000000060060060060060067006006006777700000
+06fffff00aaaaaa0055555500ffffff0011111100022220000555500009999900040400000505000000000000060060060670060060067006067006777700000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060060060060067000067006067700677700000
 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000060067777777777777006777006777777700000
 0000b30005555550077777700eeeeee0004050000050100000000000000000000000000000000000000000000060077777777777000006777777777777700000
