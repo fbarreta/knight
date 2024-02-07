@@ -3,7 +3,7 @@ version 41
 __lua__
 levels = {
 	{
-		moves=20,
+		moves=50,
 		grid = {r=5,c=5},
 		holes = {
 			{x = 0,y = 0},
@@ -282,7 +282,7 @@ function _draw()
  checklevel()
  splashscreen()
  drawlevel()
- debug(2, 120)
+ //debug(2, 120)
 end
 
 function levelupdate()
@@ -485,19 +485,23 @@ function drawui()
 		spr(39,82,16,2,1)
 	end
 	line(42,119,86,119,8)
-	//progress bar 44px
-	//local range = 5
-	//local rangestep = 100 / range
-	//local len = 44
-	//local step = len * 0.01
-	//local m = (levels[level].moves - moves) - stars.s2 - stars.s1
-	//local p = flr(step * (m * rangestep))
-	//if stars.score < 3 and p > 0 then
-	//		if p > len then
-	//			p = len
-	//		end
-	//	line(86-p,119,86,119,6)
-	//end
+	// progress bar 44px
+	local len = 22
+	local range = stars.s3 - stars.s2
+	if stars.score <= 1 then
+		range = stars.s2 - stars.s1
+	end
+	local rangestep = 100 / range
+	local step = len * 0.01
+	local totalmoves = levels[level].moves
+	local m = (totalmoves - moves) - (totalmoves - stars.s3)
+	local p = flr(step * (m * rangestep))
+	if stars.score < 3 and p > 0 then
+			if p > 44 then
+				p = 44
+			end
+		line(86-p,119,86,119,6)
+	end
 	line(55,119,55,119,7)
 	line(75,119,75,119,7)
 	local s3 = 8;
@@ -519,11 +523,11 @@ function drawui()
 	color(0)
 	drawbackground()
 	rect(0,0,127,127,0)
-	message = "p:"..tostr(p)
-	      .. " s3:"..tostr(stars.s3)
-							.. " s2:"..tostr(stars.s2)
-							.. " s1:"..tostr(stars.s1)
-							.. " s0:"..tostr(stars.s0)
+	//message = "m:"..tostr(pp)
+	//      .. " s3:"..tostr(stars.s3)
+	//						.. " s2:"..tostr(stars.s2)
+	//						.. " s1:"..tostr(stars.s1)
+	//						.. " s0:"..tostr(stars.s0)
 end
 
 function drawbackground()
