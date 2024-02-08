@@ -3,7 +3,7 @@ version 41
 __lua__
 levels = {
 	{
-		moves=50,
+		moves=55,
 		grid = {r=5,c=5},
 		holes = {
 			{x = 0,y = 0},
@@ -486,11 +486,8 @@ function drawui()
 	end
 	line(42,119,86,119,8)
 	// progress bar 44px
-	local len = 22
-	local range = stars.s3 - stars.s2
-	if stars.score <= 1 then
-		range = stars.s2 - stars.s1
-	end
+	local len = 44
+	local range = stars.s3 - stars.s1 - 1
 	local rangestep = 100 / range
 	local step = len * 0.01
 	local totalmoves = levels[level].moves
@@ -523,7 +520,7 @@ function drawui()
 	color(0)
 	drawbackground()
 	rect(0,0,127,127,0)
-	//message = "m:"..tostr(pp)
+	//message = "m:"..tostr(m)
 	//      .. " s3:"..tostr(stars.s3)
 	//						.. " s2:"..tostr(stars.s2)
 	//						.. " s1:"..tostr(stars.s1)
@@ -773,12 +770,12 @@ end
 
 function calcstars()
 	local m = moves
-	local h = flr(m/2) + 5
+	local h = flr(m/2)
 	local i = flr((m-h)/3)
 	stars.s3 = h;
-	stars.s2 = i * 3;
-	stars.s1 = i * 2;
-	stars.s0 = i;
+	stars.s2 = i * 2;
+	stars.s1 = i;
+	stars.s0 = 0;
 	stars.score = 3
 end
 
